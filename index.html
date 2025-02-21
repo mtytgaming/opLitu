@@ -3,216 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Run Litu Prototype</title>
+    <title>Vag Litu Vag</title>
     <style>
-        body {
+        body, html {
             margin: 0;
             overflow: hidden;
-            background: url('bg.png') no-repeat center center/cover;
-            font-family: Arial, sans-serif;
+            background: black;
+            touch-action: none;
         }
-        #gameCanvas {
+        canvas {
             display: block;
+            width: 100vw;
+            height: 100vh;
         }
-        #scoreBoard {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            color: white;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 15px;
-            border-radius: 10px;
-        }
-        #restartScreen, #startScreen {
-            position: absolute;
+        .menu, .game-over {
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            width: 300px;
+            color: rgb(255, 255, 255);
+            font-family: Arial, sans-serif;
         }
         button {
-            padding: 15px 30px;
-            font-size: 24px;
-            background-color: green;
-            color: white;
+            padding: 10px 20px;
+            font-size: 20px;
             border: none;
             border-radius: 10px;
+            background: gold;
+            color: black;
             cursor: pointer;
         }
-        #jumpButton {
-            position: absolute;
+        .controls {
+            position: fixed;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 20px 40px;
-            font-size: 24px;
-            background-color: blue;
-            color: white;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            background: gold;
+            border-radius: 50%;
             border: none;
-            border-radius: 10px;
+            font-size: 30px;
+            font-weight: bold;
+            color: black;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div id="startScreen">
-        <h1>Welcome to Run Litu Run!</h1>
-        <p>Litu was a dictator like Hasina Of TIPC.So students did the same thing with litu what they did with hasina.Now help litu escape.Im not a graphics designer so the graphics may look trush. I will try to make a 3d version in future.Also litu has attraction for money so help him collecting money while escaping and try to escape our Idol Johnny Sins. Jump using Spacebar or the button.</p>
+    <canvas id="gameCanvas"></canvas>
+    <div class="menu" id="startMenu">
+        <h1>By Sins Studio (Support@pornhub.com)</h1>
+        <p>Litu was a dictator like Hasina Of TIPC. So students did the same thing with Litu that they did with Hasina. Now help Litu to escape. Litu is carrying his heavy wife in plane so u need to collect fuel or u will die.Also he is in the target of Johnny Sins. Try To avoid johnny sins because if u are hit by johnny, you dont know what will happen!</p>
+        <p>Note: Graphics may look trash because Johnny sins is not a graphics designer. he design u know what, but a 3D version might come in the future!</p>
         <button onclick="startGame()">Start Game</button>
     </div>
-    <div id="restartScreen" style="display: none;">
-        <h1>Got F*cked By Johnny Sins Lol!</h1>
-        <p>Your Score: <span id="finalScore"></span></p>
+    <div class="game-over" id="gameOverMenu" style="display: none;">
+        <h1>F*cked By Johnny Sins Lol!</h1>
+        <p id="finalScore"></p>
         <button onclick="restartGame()">Restart</button>
     </div>
-    <div id="scoreBoard">Score: 0</div>
-    <canvas id="gameCanvas"></canvas>
-    <button id="jumpButton" onclick="jump()">Jump</button>
+    <div class="controls">
+        <button class="control-btn" id="leftBtn">←</button>
+        <button class="control-btn" id="rightBtn">→</button>
+    </div>
 
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        let player, playerImg, cowImg, birdImg, obstacles, birds, coins, gameSpeed, jumping, score;
-        playerImg = new Image();
-        playerImg.src = "litu.png";
+        const planeImg = new Image();
+        planeImg.src = 'litu.png';
+        const asteroidImg = new Image();
+        asteroidImg.src = 'cow.png';
+        const bgImg = new Image();
+        bgImg.src = 'bg.png';
 
-        cowImg = new Image();
-        cowImg.src = "cow.png";
+        let plane, asteroids, coins, score, oil, gameRunning;
+        let leftPressed = false, rightPressed = false;
 
-        birdImg = new Image();
-        birdImg.src = "bird.png";
-
-        function resetGame() {
-            player = { x: 50, y: canvas.height - 210, width: 70, height: 70, dy: 0, gravity: 1, alive: true };
-            obstacles = [];
-            birds = [];
+        function initGame() {
+            plane = { x: canvas.width / 2, y: canvas.height - 100, width: 80, height: 80, speed: 10 };
+            asteroids = [];
             coins = [];
-            gameSpeed = 2;
-            jumping = false;
             score = 0;
-            document.getElementById("scoreBoard").innerText = "Score: 0";
-            document.getElementById("restartScreen").style.display = "none";
+            oil = 100;
+            gameRunning = false;
         }
 
-        function drawPlayer() { ctx.drawImage(playerImg, player.x, player.y, player.width, player.height); }
-
-        function drawCoin(x, y) {
-            ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2);
-            ctx.fillStyle = "gold";
-            ctx.fill();
-            ctx.closePath();
+        function startGame() {
+            document.getElementById('startMenu').style.display = 'none';
+            document.getElementById('gameOverMenu').style.display = 'none';
+            initGame();
+            gameRunning = true;
+            loop();
         }
 
-        function drawCow(x, y) { ctx.drawImage(cowImg, x, y, 45, 45); }
-
-        function jump() {
-            if (!jumping && player.alive) {
-                player.dy = -25;
-                jumping = true;
-            }
-        }
-        window.addEventListener("keydown", (e) => { if (e.code === "Space") jump(); });
-
-        function updatePlayer() {
-            player.y += player.dy;
-            player.dy += player.gravity;
-            if (player.y > canvas.height - 210) {
-                player.y = canvas.height - 210;
-                jumping = false;
-            }
+        function restartGame() {
+            startGame();
         }
 
-        function drawBirds() {
-            birds.forEach((bird, index) => {
-                bird.x -= gameSpeed;
-                ctx.drawImage(birdImg, bird.x, bird.y, 40, 40);
-                if (bird.x + 40 < 0) birds.splice(index, 1);
-            });
+        function createAsteroid() {
+            const size = Math.random() * 40 + 20;
+            const speed = window.innerWidth < 768 ? 3 : 5; // Less asteroids on smaller screens
+            asteroids.push({ x: Math.random() * canvas.width, y: -size, width: size, height: size, speed });
         }
 
-        function drawObstacles() {
-            obstacles.forEach((obstacle, index) => {
-                obstacle.x -= gameSpeed;
-                drawCow(obstacle.x, obstacle.y);
-                if (obstacle.x + 80 < 0) obstacles.splice(index, 1);
-            });
+        function createCoin() {
+            coins.push({ x: Math.random() * canvas.width, y: -20, size: 20 });
         }
 
-        function drawCoins() {
-            coins.forEach((coin, index) => {
-                coin.x -= gameSpeed;
-                drawCoin(coin.x, coin.y);
-                if (coin.x + 40 < 0) coins.splice(index, 1);
-            });
-        }
+        function update() {
+            if (!gameRunning) return;
 
-        function spawnBird() { if (Math.random() < 0.6) birds.push({ x: canvas.width, y: canvas.height - 750 - Math.random() * 50 }); }
+            score++;
+            oil -= 0.1;
+            if (oil <= 0) endGame();
 
-        function spawnCoin() { if (Math.random() < 0.3) coins.push({ x: canvas.width, y: canvas.height - 250 - Math.random() * 100 }); }
+            if (leftPressed) plane.x = Math.max(plane.x - plane.speed, 0);
+            if (rightPressed) plane.x = Math.min(plane.x + plane.speed, canvas.width - plane.width);
 
-        function spawnObstacle() { if (Math.random() < 0.5) obstacles.push({ x: canvas.width, y: canvas.height - 210 }); }
+            asteroids.forEach(a => a.y += a.speed);
+            coins.forEach(c => c.y += 4);
 
-        function checkCollisions() {
-            obstacles.forEach(obstacle => {
-                if (player.x < obstacle.x + 80 && player.x + player.width > obstacle.x &&
-                    player.y < obstacle.y + 80 && player.y + player.height > obstacle.y) player.alive = false;
-            });
+            asteroids = asteroids.filter(a => a.y < canvas.height);
+            coins = coins.filter(c => c.y < canvas.height);
 
-            birds.forEach(bird => {
-                if (player.x < bird.x + 70 && player.x + player.width > bird.x &&
-                    player.y < bird.y + 70 && player.y + player.height > bird.y) player.alive = false;
-            });
-
-            coins.forEach((coin, index) => {
-                if (player.x < coin.x + 40 && player.x + player.width > coin.x &&
-                    player.y < coin.y + 40 && player.y + player.height > coin.y) {
-                    score += 10;
-                    coins.splice(index, 1);
-                    document.getElementById("scoreBoard").innerText = "Score: " + score;
+            asteroids.forEach(a => {
+                if (a.x < plane.x + plane.width && a.x + a.width > plane.x &&
+                    a.y < plane.y + plane.height && a.y + a.height > plane.y) {
+                    endGame();
                 }
             });
 
-            if (!player.alive) {
-                document.getElementById("finalScore").innerText = score;
-                document.getElementById("restartScreen").style.display = "block";
-            }
+            coins.forEach((c, index) => {
+                if (c.x < plane.x + plane.width && c.x + c.size > plane.x &&
+                    c.y < plane.y + plane.height && c.y + c.size > plane.y) {
+                    oil = Math.min(oil + 20, 100);
+                    coins.splice(index, 1);
+                }
+            });
+
+            if (Math.random() < (window.innerWidth < 768 ? 0.03 : 0.05)) createAsteroid();
+            if (Math.random() < 0.02) createCoin();
         }
 
-        function gameLoop() {
+        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawPlayer();
-            drawObstacles();
-            drawBirds();
-            drawCoins();
-            updatePlayer();
-            checkCollisions();
-            if (player.alive) {
-                score += 1;
-                document.getElementById("scoreBoard").innerText = "Score: " + score;
-                gameSpeed += 0.005;
-                requestAnimationFrame(gameLoop);
-            }
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(plane.x + plane.width / 2, plane.y + plane.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.drawImage(planeImg, -plane.width / 2, -plane.height / 2, plane.width, plane.height);
+            ctx.restore();
+
+            asteroids.forEach(a => ctx.drawImage(asteroidImg, a.x, a.y, a.width, a.height));
+
+            ctx.fillStyle = 'gold';
+            coins.forEach(c => {
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = 'black';
+            ctx.font = '24px Arial';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+            ctx.fillText(`Oil: ${Math.floor(oil)}`, 10, 60);
         }
 
-        function startGame() { document.getElementById("startScreen").style.display = "none"; resetGame(); gameLoop(); }
+        function endGame() {
+            gameRunning = false;
+            document.getElementById('gameOverMenu').style.display = 'block';
+            document.getElementById('finalScore').textContent = `Your Score: ${score}`;
+        }
 
-        function restartGame() { resetGame(); gameLoop(); }
+        function loop() {
+            update();
+            draw();
+            if (gameRunning) requestAnimationFrame(loop);
+        }
 
-        setInterval(spawnObstacle, 1800);
-        setInterval(spawnBird, 4800);
-        setInterval(spawnCoin, 1200);
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') leftPressed = true;
+            if (e.key === 'ArrowRight') rightPressed = true;
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft') leftPressed = false;
+            if (e.key === 'ArrowRight') rightPressed = false;
+        });
+
+        document.getElementById('leftBtn').addEventListener('mousedown', () => leftPressed = true);
+        document.getElementById('leftBtn').addEventListener('mouseup', () => leftPressed = false);
+        document.getElementById('rightBtn').addEventListener('mousedown', () => rightPressed = true);
+        document.getElementById('rightBtn').addEventListener('mouseup', () => rightPressed = false);
+
+        initGame();
     </script>
-
-    <p style="position: absolute; bottom: 10px; left: 10px; color: black;">Game by Sins Studio (support@pornhub.com)</p>
 </body>
 </html>
