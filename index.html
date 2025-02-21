@@ -113,11 +113,11 @@
             ctx.closePath();
         }
 
-        function drawCow(x, y) { ctx.drawImage(cowImg, x, y, 80, 80); }
+        function drawCow(x, y) { ctx.drawImage(cowImg, x, y, 45, 45); }
 
         function jump() {
             if (!jumping && player.alive) {
-                player.dy = -30;
+                player.dy = -20;
                 jumping = true;
             }
         }
@@ -135,7 +135,7 @@
         function drawBirds() {
             birds.forEach((bird, index) => {
                 bird.x -= gameSpeed;
-                ctx.drawImage(birdImg, bird.x, bird.y, 70, 70);
+                ctx.drawImage(birdImg, bird.x, bird.y, 40, 40);
                 if (bird.x + 40 < 0) birds.splice(index, 1);
             });
         }
@@ -213,6 +213,6 @@
         setInterval(spawnCoin, 1200);
     </script>
 
-    <p style="position: absolute; bottom: 10px; left: 10px; color: black;">Game by Sins Studio</p>
+    <p style="position: absolute; bottom: 10px; left: 10px; color: black;">Game by Sins Studio (Test 1)</p>
 </body>
 </html>
