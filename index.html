@@ -136,7 +136,7 @@
             birds.forEach((bird, index) => {
                 bird.x -= gameSpeed;
                 ctx.drawImage(birdImg, bird.x, bird.y, 70, 70);
-                if (bird.x + 70 < 0) birds.splice(index, 1);
+                if (bird.x + 40 < 0) birds.splice(index, 1);
             });
         }
 
