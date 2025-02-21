@@ -59,8 +59,7 @@
     <canvas id="gameCanvas"></canvas>
     <div class="menu" id="startMenu">
         <h1>By Sins Studio (Support@pornhub.com)</h1>
-        <p>Litu was a dictator like Hasina Of TIPC. So students did the same thing with Litu that they did with Hasina. Now help Litu to escape. Litu is carrying his heavy wife in plane so u need to collect fuel or u will die.Also he is in the target of Johnny Sins. Try To avoid johnny sins because if u are hit by johnny, you dont know what will happen!</p>
-        <p>Note: Graphics may look trash because Johnny sins is not a graphics designer. he design u know what, but a 3D version might come in the future!</p>
+        <p>Litu was a dictator like Hasina Of TIPC. So students did the same thing with Litu that they did with Hasina. Now help Litu to escape. Litu is carrying his heavy wife in plane so u need to collect fuel or u will die. Also he is in the target of Johnny Sins. Try to avoid Johnny Sins because if u are hit by Johnny, you don't know what will happen.Litu will fire to protect his money I mean wife!</p>
         <button onclick="startGame()">Start Game</button>
     </div>
     <div class="game-over" id="gameOverMenu" style="display: none;">
@@ -86,16 +85,19 @@
         const bgImg = new Image();
         bgImg.src = 'bg.png';
 
-        let plane, asteroids, coins, score, oil, gameRunning;
+        let plane, asteroids, coins, bullets, score, oil, gameRunning;
         let leftPressed = false, rightPressed = false;
+        let shootCooldown = 0;
 
         function initGame() {
-            plane = { x: canvas.width / 2, y: canvas.height - 100, width: 50, height: 50, speed: 10 };
+            plane = { x: canvas.width / 2, y: canvas.height - 100, width: 50, height: 50, speed: 6 };
             asteroids = [];
             coins = [];
+            bullets = [];
             score = 0;
             oil = 100;
             gameRunning = false;
+            shootCooldown = 0;
         }
 
         function startGame() {
@@ -112,12 +114,16 @@
 
         function createAsteroid() {
             const size = Math.random() * 40 + 20;
-            const speed = window.innerWidth < 768 ? 3 : 5; // Less asteroids on smaller screens
-            asteroids.push({ x: Math.random() * canvas.width, y: -size, width: size, height: size, speed });
+            const speed = window.innerWidth < 768 ? 1.5 : 2.5;
+            asteroids.push({ x: Math.random() * canvas.width, y: -size, width: size, height: size, speed, health: 3 });
         }
 
         function createCoin() {
             coins.push({ x: Math.random() * canvas.width, y: -20, size: 20 });
+        }
+
+        function shootBullet() {
+            bullets.push({ x: plane.x + plane.width / 2 - 5, y: plane.y, width: 10, height: 20, speed: 10 });
         }
 
         function update() {
@@ -132,9 +138,33 @@
 
             asteroids.forEach(a => a.y += a.speed);
             coins.forEach(c => c.y += 4);
+            bullets.forEach(b => b.y -= b.speed);
 
             asteroids = asteroids.filter(a => a.y < canvas.height);
             coins = coins.filter(c => c.y < canvas.height);
+            bullets = bullets.filter(b => b.y > 0);
+
+            shootCooldown++;
+            if (shootCooldown >= 30) {
+                shootBullet();
+                shootCooldown = 0;
+            }
+
+            bullets.forEach((bullet, bulletIndex) => {
+                asteroids.forEach((asteroid, asteroidIndex) => {
+                    if (bullet.x < asteroid.x + asteroid.width &&
+                        bullet.x + bullet.width > asteroid.x &&
+                        bullet.y < asteroid.y + asteroid.height &&
+                        bullet.y + bullet.height > asteroid.y) {
+                        asteroid.health-= 2;
+                        if (asteroid.health <= 0) {
+                            asteroids.splice(asteroidIndex, 1);
+                            score += 10;
+                        }
+                        bullets.splice(bulletIndex, 1);
+                    }
+                });
+            });
 
             asteroids.forEach(a => {
                 if (a.x < plane.x + plane.width && a.x + a.width > plane.x &&
@@ -151,11 +181,9 @@
                 }
             });
 
-           const isMobile = window.innerWidth < 768;
-
-// Reduce obstacle frequency for mobile
-if (Math.random() < (isMobile ? 0.015 : 0.05)) createAsteroid();
-if (Math.random() < (isMobile ? 0.02 : 0.02)) createCoin();
+            const isMobile = window.innerWidth < 768;
+            if (Math.random() < (isMobile ? 0.015 : 0.05)) createAsteroid();
+            if (Math.random() < 0.02) createCoin();
         }
 
         function draw() {
@@ -177,6 +205,9 @@ if (Math.random() < (isMobile ? 0.02 : 0.02)) createCoin();
                 ctx.fill();
             });
 
+            ctx.fillStyle = 'red';
+            bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+
             ctx.fillStyle = 'black';
             ctx.font = '24px Arial';
             ctx.fillText(`Score: ${score}`, 10, 30);
@@ -195,28 +226,19 @@ if (Math.random() < (isMobile ? 0.02 : 0.02)) createCoin();
             if (gameRunning) requestAnimationFrame(loop);
         }
 
-        window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft') leftPressed = true;
-            if (e.key === 'ArrowRight') rightPressed = true;
-        });
-
-        window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft') leftPressed = false;
-            if (e.key === 'ArrowRight') rightPressed = false;
-        });
-
         const leftBtn = document.getElementById('leftBtn');
-const rightBtn = document.getElementById('rightBtn');
+        const rightBtn = document.getElementById('rightBtn');
 
-leftBtn.addEventListener('mousedown', () => leftPressed = true);
-leftBtn.addEventListener('mouseup', () => leftPressed = false);
-leftBtn.addEventListener('touchstart', () => leftPressed = true);
-leftBtn.addEventListener('touchend', () => leftPressed = false);
+        leftBtn.addEventListener('mousedown', () => leftPressed = true);
+        leftBtn.addEventListener('mouseup', () => leftPressed = false);
+        leftBtn.addEventListener('touchstart', () => leftPressed = true);
+        leftBtn.addEventListener('touchend', () => leftPressed = false);
 
-rightBtn.addEventListener('mousedown', () => rightPressed = true);
-rightBtn.addEventListener('mouseup', () => rightPressed = false);
-rightBtn.addEventListener('touchstart', () => rightPressed = true);
-rightBtn.addEventListener('touchend', () => rightPressed = false);
+        rightBtn.addEventListener('mousedown', () => rightPressed = true);
+        rightBtn.addEventListener('mouseup', () => rightPressed = false);
+        rightBtn.addEventListener('touchstart', () => rightPressed = true);
+        rightBtn.addEventListener('touchend', () => rightPressed = false);
+
         initGame();
     </script>
 </body>
