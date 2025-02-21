@@ -117,7 +117,7 @@
 
         function jump() {
             if (!jumping && player.alive) {
-                player.dy = -20;
+                player.dy = -25;
                 jumping = true;
             }
         }
@@ -135,7 +135,7 @@
         function drawBirds() {
             birds.forEach((bird, index) => {
                 bird.x -= gameSpeed;
-                ctx.drawImage(birdImg, bird.x, bird.y, 40, 40);
+                ctx.drawImage(birdImg, bird.x, bird.y, 40, 240);
                 if (bird.x + 40 < 0) birds.splice(index, 1);
             });
         }
@@ -213,6 +213,6 @@
         setInterval(spawnCoin, 1200);
     </script>
 
-    <p style="position: absolute; bottom: 10px; left: 10px; color: black;">Game by Sins Studio (Test 1)</p>
+    <p style="position: absolute; bottom: 10px; left: 10px; color: black;">Game by Sins Studio (Test 2)</p>
 </body>
 </html>
