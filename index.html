@@ -202,11 +202,18 @@
             if (e.key === 'ArrowRight') rightPressed = false;
         });
 
-        document.getElementById('leftBtn').addEventListener('mousedown', () => leftPressed = true);
-        document.getElementById('leftBtn').addEventListener('mouseup', () => leftPressed = false);
-        document.getElementById('rightBtn').addEventListener('mousedown', () => rightPressed = true);
-        document.getElementById('rightBtn').addEventListener('mouseup', () => rightPressed = false);
+        const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
 
+leftBtn.addEventListener('mousedown', () => leftPressed = true);
+leftBtn.addEventListener('mouseup', () => leftPressed = false);
+leftBtn.addEventListener('touchstart', () => leftPressed = true);
+leftBtn.addEventListener('touchend', () => leftPressed = false);
+
+rightBtn.addEventListener('mousedown', () => rightPressed = true);
+rightBtn.addEventListener('mouseup', () => rightPressed = false);
+rightBtn.addEventListener('touchstart', () => rightPressed = true);
+rightBtn.addEventListener('touchend', () => rightPressed = false);
         initGame();
     </script>
 </body>
