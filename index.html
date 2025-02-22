@@ -73,11 +73,11 @@
     <canvas id="gameCanvas"></canvas>
     <div class="menu" id="startMenu">
         <h1>Developed By Sins Studio<br/>
-                Sponsored by P rnHub</h1>
-    </p> <b>TIPC College এর অধ্যক্ষ লিটু কলেজ এর বিল্ডিং এর টাকা চুরি  করে প্লেনে করে পল্লাচ্ছে। তার সামনে অনেক বাঁধা পড়বে সেগুলো থেকে তাকে বাঁচতে সাহায্য করো। কলেজ এর টাকা খেয়ে খেয়ে তার ওজন বেশি হয়ে
- গেছে। তাই তার প্লেনে এ তেল বেশি খাচ্ছে। তাই পালানোর পথে তেল সংগ্রহ করতে হবে কিন্তু।</b></p>
+            Sponsored by P rnHub</h1>
+</p> <b>TIPC College এর অধ্যক্ষ লিটু কলেজ এর বিল্ডিং এর টাকা চুরি  করে প্লেনে করে পল্লাচ্ছে। তার সামনে অনেক বাঁধা পড়বে সেগুলো থেকে তাকে বাঁচতে সাহায্য করো। কলেজ এর টাকা খেয়ে খেয়ে তার ওজন বেশি হয়ে
+গেছে। তাই তার প্লেনে এ তেল বেশি খাচ্ছে। তাই পালানোর পথে তেল সংগ্রহ করতে হবে কিন্তু।</b></p>
 
-        <button onclick="startGame()">Start Game</button>
+    <button onclick="startGame()">Start Game</button>
 
     </div>
 
@@ -226,6 +226,34 @@ function shootBullet() {
             };
             // Clear all small obstacles when boss arrives (except coins)
             asteroids = [];
+
+
+
+// Show warning message
+const warningMessage = document.createElement("div");
+    warningMessage.id = "bossWarning";
+    warningMessage.innerHTML = "⚠️ Protect Litu from Johnny Sins or Litu Might Get F*cked! ⚠️";
+    warningMessage.style.position = "fixed";
+    warningMessage.style.top = "50%";
+    warningMessage.style.left = "50%";
+    warningMessage.style.transform = "translate(-50%, -50%)";
+    warningMessage.style.background = "red";
+    warningMessage.style.color = "white";
+    warningMessage.style.padding = "20px";
+    warningMessage.style.fontSize = "24px";
+    warningMessage.style.fontWeight = "bold";
+    warningMessage.style.borderRadius = "10px";
+    warningMessage.style.zIndex = "1000";
+    document.body.appendChild(warningMessage);
+
+    // Remove warning after 3 seconds
+    setTimeout(() => {
+        document.body.removeChild(warningMessage);
+    }, 4500);
+
+
+
+
             // Play boss appearance sound
     bossSound.currentTime = 0;  // Reset the sound if it was already playing
     bossSound.play();
@@ -386,6 +414,10 @@ if (rightPressed) plane.x = Math.min(plane.x + plane.speed, canvas.width - plane
             // Draw boss
             if (boss) {
                 ctx.drawImage(birdImg, boss.x, boss.y, boss.width, boss.height);
+
+                  
+    // Draw boss name above the health bar
+    
                 // Draw boss health bar
                 ctx.fillStyle = 'red';
                 ctx.fillRect(boss.x, boss.y - 20, boss.width, 10);
