@@ -92,6 +92,8 @@
     </div>
 
     <script>
+        let speedMultiplier = 1.0; //by Md Mahbub Tanmay
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -190,12 +192,12 @@ bgMusic.volume = 0.1; // Set low volume (adjust as needed)
         function restartGame() {
             startGame();
         }
-
         function createAsteroid() {
-            const size = Math.random() * 60 + 30;
-            const speed = window.innerWidth < 768 ? 1.5 : 2.5;
-            asteroids.push({ x: Math.random() * canvas.width, y: -size, width: size, height: size, speed, health: 3 });
-        }
+    const size = Math.random() * 60 + 30;
+    const baseSpeed = window.innerWidth < 768 ? 1.5 : 2.5;
+    asteroids.push({ x: Math.random() * canvas.width, y: -size, width: size, height: size, speed: baseSpeed * speedMultiplier, health: 3 });
+}
+
 
        function createCoin() {
     const size = 40; // Adjust the size of the oil image if needed
@@ -231,7 +233,8 @@ function shootBullet() {
 
         function bossShoot() {
             if (boss && boss.shootCooldown <= 0) {
-                bossBullets.push({ x: boss.x + boss.width / 2 - 10, y: boss.y + boss.height, width: 25, height: 35, speed: 5 });
+                bossBullets.push({ x: boss.x + boss.width / 2 - 10, y: boss.y + boss.height, width: 25, height: 35, speed: 5 * speedMultiplier });
+
                 boss.shootCooldown = 60; // Cooldown for shooting
             }
         }
@@ -270,7 +273,8 @@ if (rightPressed) plane.x = Math.min(plane.x + plane.speed, canvas.width - plane
 
             if (boss) {
                 // Move boss
-                boss.x += boss.speed * boss.moveDirection;
+                boss.x += boss.speed * boss.moveDirection * speedMultiplier;
+            
                 if (boss.x <= 0 || boss.x + boss.width >= canvas.width) {
                     boss.moveDirection *= -1;
                 }
@@ -288,7 +292,8 @@ if (rightPressed) plane.x = Math.min(plane.x + plane.speed, canvas.width - plane
                         boss.health--;
                         bullets.splice(bulletIndex, 1);
                         if (boss.health <= 0) {
-                            score += 1000;
+                            score += 500;
+                            speedMultiplier += 0.3;
                             startGame2(); // Reset player health
                         }
                     }
